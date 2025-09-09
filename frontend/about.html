@@ -1,0 +1,398 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seafood Delivery - Nearest Depot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      font-size: 16px;
+    }
+    #result {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Seafood Delivery - Nearest Depot Finder</h1>
+
+  <h2>Enter Your Address</h2>
+  <input type="text" id="address" placeholder="Enter your full address">
+  <button onclick="findDepot()">Find Nearest Depot</button>
+
+  <p id="result"></p>
+
+  <script>
+    async function findDepot() {
+      const address = document.getElementById("address").value;
+      if (!address) {
+        alert("Please enter an address");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/nearest-depot?address=${encodeURIComponent(address)}`);
+        const data = await response.json();
+
+        if (data.error) {
+          document.getElementById("result").innerText = "❌ Address not found";
+        } else {
+          document.getElementById("result").innerText =
+            `✅ Nearest Depot: ${data.nearest_depot} | Distance: ${data.distance_km} km`;
+        }
+      } catch (err) {
+        document.getElementById("result").innerText = "⚠️ Could not reach backend. Make sure backend is running!";
+      }
+    }
+  </script>
+
+</body>
+</html> -->
+
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seafood Delivery - Nearest Depot</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background-color: #f0f0f0; }
+    input, button { padding: 10px; margin: 5px 0; font-size: 16px; }
+    #result { margin-top: 15px; font-weight: bold; }
+    #map { height: 500px; width: 100%; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Seafood Delivery - Nearest Depot Finder</h1>
+
+  <input type="text" id="address" placeholder="Enter your full address">
+  <button onclick="findDepot()">Find Nearest Depot</button>
+
+  <p id="result"></p>
+  <div id="map"></div>
+
+ -->
+<!-- 
+<input type="text" id="address" placeholder="Enter your address">
+<button onclick="findDepotQuantum()">Find Nearest Depot</button>
+
+<p id="result"></p>
+<div id="map" style="height:500px;width:100px;"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfTSegZLNEgUowHnHZtw0fYWvq_j9iooI"></script>
+<script>
+let map, directionsService, directionsRenderer;
+
+function initMap(userCoords, depotCoords) {
+    map = new google.maps.Map(document.getElementById("map"), { center: userCoords, zoom: 12 });
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({ map, suppressMarkers: true, polylineOptions: { strokeColor: "blue", strokeWeight: 5 } });
+
+    new google.maps.Marker({ position: userCoords, map, icon: "https://img.icons8.com/emoji/48/000000/delivery-truck.png", title: "Delivery Location" });
+    new google.maps.Marker({ position: depotCoords, map, title: "Nearest Depot" });
+
+    directionsService.route({
+        origin: depotCoords,
+        destination: userCoords,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, (response, status) => {
+        if (status === "OK") directionsRenderer.setDirections(response);
+        else alert("Could not display route: " + status);
+    });
+}
+
+async function findDepotQuantum() {
+    const address = document.getElementById("address").value;
+    if (!address) return alert("Enter address");
+
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/quantum-route?address=${encodeURIComponent(address)}`);
+        const data = await res.json();
+
+        if (data.error) {
+            document.getElementById("result").innerText = "❌ Address not found";
+            return;
+        }
+
+        document.getElementById("result").innerText =
+            `✅ Nearest Depot: ${data.route_order[0]} | Distance: ${data.distance_km} km`;
+
+        initMap({ lat: data.user_lat, lng: data.user_lng }, { lat: data.depot_lat, lng: data.depot_lng });
+
+    } catch (err) {
+        document.getElementById("result").innerText = "⚠️ Could not reach backend!";
+    }
+}
+</script> -->
+<!-- 
+<input type="text" id="addresses" placeholder="Enter addresses separated by commas">
+<button onclick="findMultipleDepots()">Find Nearest Depots</button>
+
+<p id="result"></p>
+<div id="map" style="height:500px;width:100%;"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBE-TPHTwmGiWRqETlPaHDCngSPcBbhWX8"></script>
+<script>
+let map, directionsService, directionsRenderer;
+
+function initMap(depotCoords, userCoordsArray) {
+    // Center map between depot and first user
+    const centerLat = (depotCoords.lat + userCoordsArray[0].lat) / 2;
+    const centerLng = (depotCoords.lng + userCoordsArray[0].lng) / 2;
+
+    map = new google.maps.Map(document.getElementById("map"), { center: {lat:centerLat,lng:centerLng}, zoom:6 });
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({ map, suppressMarkers:true, polylineOptions:{strokeColor:"blue", strokeWeight:5} });
+
+    // Depot marker (truck)
+    new google.maps.Marker({ position: depotCoords, map, icon: "https://img.icons8.com/emoji/48/000000/delivery-truck.png", title:"Depot" });
+
+    // User markers (humans)
+    userCoordsArray.forEach(user => {
+        new google.maps.Marker({ position: user, map, icon: "https://img.icons8.com/emoji/48/000000/person-raising-hand.png", title:"User" });
+    });
+
+    // Route: depot -> all users (quantum-simulated)
+    let waypoints = userCoordsArray.slice(1).map(u => ({ location: u, stopover:true }));
+    directionsService.route({
+        origin: depotCoords,
+        destination: userCoordsArray[userCoordsArray.length-1],
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, (response,status)=>{
+        if(status==="OK") directionsRenderer.setDirections(response);
+        else alert("Route error: "+status);
+    });
+}
+
+async function findMultipleDepots() {
+    const addresses = document.getElementById("addresses").value;
+    if(!addresses) return alert("Enter addresses");
+
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/quantum-route-multiple?addresses=${encodeURIComponent(addresses)}`);
+        const data = await res.json();
+
+        const results = data.results.filter(r => !r.error);
+        if(results.length===0) {
+            document.getElementById("result").innerText = "❌ No valid addresses";
+            return;
+        }
+
+        // Show nearest depot info
+        let resultText = "";
+        results.forEach(r => {
+            resultText += `✅ ${r.address} → Depot: ${r.nearest_depot} | Distance: ${r.distance_km} km\n`;
+        });
+        document.getElementById("result").innerText = resultText;
+
+        // Use first depot as reference (for route display)
+        const depotCoords = { lat: results[0].depot_lat, lng: results[0].depot_lng };
+        const userCoordsArray = results.map(r => ({ lat: r.user_lat, lng: r.user_lng }));
+
+        initMap(depotCoords,userCoordsArray);
+
+    } catch(err) {
+        console.error(err);
+        document.getElementById("result").innerText = "⚠️ Could not reach backend!";
+    }
+}
+</script>
+
+
+
+ -->
+
+<!-- 
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Food Delivery - Multiple Depots</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS for the map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 60vh; width: 100%; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8 flex items-center justify-center min-h-screen">
+    <div class="container mx-auto p-6 bg-white rounded-2xl shadow-xl max-w-4xl w-full">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-teal-700 mb-2">Sea Food Delivery</h1>
+        <p class="text-center text-gray-600 mb-6 sm:mb-8">Find the nearest harbor for each of your addresses.</p>
+
+        <!-- Input and button section -->
+        <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+            <input type="text" id="addressesInput" placeholder="Enter multiple addresses separated by commas"
+                class="w-full sm:flex-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300">
+            <button id="findRouteBtn"
+                class="w-full sm:w-auto px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+                Find Nearest Depots
+            </button>
+        </div>
+
+        <!-- Loading and results display -->
+        <div id="statusMessage" class="text-center my-4 font-medium text-gray-600 hidden">
+            <span class="animate-pulse">Exploring paths...</span>
+        </div>
+        
+        <div id="resultsContainer" class="bg-teal-50 p-4 rounded-xl shadow-inner mt-4 mb-6 hidden">
+            <h3 class="text-lg font-bold text-teal-800 mb-2">Results:</h3>
+            <div id="resultList" class="flex flex-col space-y-2"></div>
+        </div>
+
+        <!-- Map container -->
+        <div id="map" class="rounded-xl shadow-lg"></div>
+    </div>
+
+    <!-- Leaflet JS and OSRM for the map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        // Backend API URL
+        const API_URL = "http://127.0.0.1:8000";
+
+        // Map Initialization
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let markers = [];
+        let routeLines = [];
+
+        /**
+         * Clears all markers and route lines from the map.
+         */
+        const clearMap = () => {
+            markers.forEach(marker => map.removeLayer(marker));
+            routeLines.forEach(line => map.removeLayer(line));
+            markers = [];
+            routeLines = [];
+        };
+
+        const findNearestDepots = async () => {
+            const addresses = document.getElementById('addressesInput').value.trim();
+            if (!addresses) {
+                statusMessage.innerHTML = `<span class="text-red-500">Please enter at least one address.</span>`;
+                statusMessage.classList.remove('hidden');
+                return;
+            }
+            const addressArray = addresses.split(',').map(addr => addr.trim());
+
+            clearMap();
+            statusMessage.innerHTML = `<span class="animate-pulse">Finding nearest depots for each address...</span>`;
+            statusMessage.classList.remove('hidden');
+            document.getElementById('findRouteBtn').disabled = true;
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('resultList').innerHTML = '';
+
+            try {
+                const bounds = L.latLngBounds([]);
+
+                for (const address of addressArray) {
+                    // Step 1: Simulate Grover's Algorithm to find the nearest depot
+                    const response = await fetch(`${API_URL}/api/find-nearest-depot?address=${encodeURIComponent(address)}`);
+                    const data = await response.json();
+
+                    if (data.error) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-red-500 text-sm';
+                        errorDiv.textContent = `⚠️ Address not found: ${address}`;
+                        document.getElementById('resultList').appendChild(errorDiv);
+                        continue; // Skip to the next address
+                    }
+
+                    // Create custom icons (truck and user pin)
+                    const userIcon = L.divIcon({ className: 'user-icon', html: '<div class="bg-blue-500 text-white p-2 rounded-full shadow-lg"><i class="fas fa-map-marker-alt"></i></div>', iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -30] });
+                    const depotIcon = L.divIcon({ className: 'depot-icon', html: '<div class="bg-red-500 text-white p-2 rounded-full shadow-lg"><i class="fas fa-truck"></i></div>', iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -30] });
+
+                    // Add markers for user and depot
+                    const userCoords = L.latLng(data.user_lat, data.user_lng);
+                    const depotCoords = L.latLng(data.depot_lat, data.depot_lng);
+                    
+                    const userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map).bindPopup(`<b>Your Address:</b><br>${address}`);
+                    const depotMarker = L.marker(depotCoords, { icon: depotIcon }).addTo(map).bindPopup(`<b>Nearest Depot:</b><br>${data.nearest_depot}`);
+                    markers.push(userMarker, depotMarker);
+                    
+                    bounds.extend(userCoords);
+                    bounds.extend(depotCoords);
+                    
+                    // Get the route from the OSRM API
+                    const osrmApiUrl = `https://router.project-osrm.org/route/v1/driving/${depotCoords.lng},${depotCoords.lat};${userCoords.lng},${userCoords.lat}?overview=full&geometries=geojson`;
+                    const osrmResponse = await fetch(osrmApiUrl);
+                    const osrmData = await osrmResponse.json();
+                    
+                    if (osrmData.code === 'Ok') {
+                        const routeGeometry = osrmData.routes[0].geometry;
+                        const routeLine = L.geoJSON(routeGeometry, {
+                            style: {
+                                color: 'blue',
+                                weight: 6,
+                                opacity: 0.75
+                            }
+                        }).addTo(map);
+                        routeLines.push(routeLine);
+                        
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'flex items-center space-x-2';
+                        const roadDistanceKm = (osrmData.routes[0].distance / 1000).toFixed(2);
+                        resultDiv.innerHTML = `
+                            <span class="text-green-500">✅</span>
+                            <p class="text-sm"><b>${address}</b> → Depot: <b>${data.nearest_depot}</b> | Distance: <b>${roadDistanceKm} km</b></p>
+                        `;
+                        document.getElementById('resultList').appendChild(resultDiv);
+                    } else {
+                        throw new Error(`Routing error for address: ${address}`);
+                    }
+                }
+
+                statusMessage.innerHTML = `<span class="text-green-500">🎉 Congrats! Services are available.</span>`;
+                statusMessage.classList.remove('hidden');
+                document.getElementById('resultsContainer').classList.remove('hidden');
+                map.fitBounds(bounds, { padding: [50, 50] });
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusMessage.innerHTML = `<span class="text-red-500">⚠️ Error: ${error.message}</span>`;
+            } finally {
+                document.getElementById('findRouteBtn').disabled = false;
+            }
+        };
+
+        // Add event listener to the button
+        document.getElementById('findRouteBtn').addEventListener('click', findNearestDepots);
+        document.getElementById('addressesInput').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                findNearestDepots();
+            }
+        });
+    </script>
+</body>
+
+</html>
