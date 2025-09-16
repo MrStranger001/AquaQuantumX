@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # import math
 # import random
@@ -168,6 +169,9 @@ import uuid
 from typing import Dict, List
 
 from fastapi import FastAPI, HTTPException
+=======
+from fastapi import FastAPI, Query
+>>>>>>> 080975ecf100cab5785aecd48c65970d26126103
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from geopy.geocoders import Nominatim
