@@ -1,0 +1,44 @@
+from qiskit import QuantumCircuit
+from qiskit_ibm_runtime import QiskitRuntimeService, Sampler, Session
+
+# Load your account from the saved credentials
+service = QiskitRuntimeService(channel='ibm_quantum')
+
+# Create a quantum circuit with 2 qubits and 2 classical bits
+qc = QuantumCircuit(2, 2)
+
+# Apply a Hadamard gate to qubit 0, putting it in superposition
+qc.h(0)
+
+# Apply a CNOT gate with qubit 0 as control and qubit 1 as target, entangling them
+qc.cx(0, 1)
+
+# Measure the qubits and map the results to the classical bits
+qc.measure([0, 1], [0, 1])
+
+# Visualize the circuit (optional, but helpful)
+print("Circuit diagram:")
+print(qc.draw())
+
+# Select a backend (a real quantum computer or a simulator)
+# Use a simulator for now to see fast, noise-free results
+backend = service.get_backend("ibmq_qasm_simulator")
+
+# Use a session to group your jobs for more efficient execution
+with Session(service=service, backend=backend) as session:
+    # Use the Sampler primitive to run the circuit
+    sampler = Sampler(session=session)
+
+    # Submit the job with your circuit
+    job = sampler.run(qc)
+
+    # Get the results from the job
+    result = job.result()
+    
+    # Print the probability distribution of the outcomes
+    print("Execution results:")
+    print(result)
+    
+
+
+    

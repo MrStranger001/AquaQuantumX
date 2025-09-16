@@ -1,0 +1,67 @@
+import time
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
+
+def build_company_database():
+    """
+    A script to geocode a list of company addresses.
+    """
+    # Initialize the geocoder. Nominatim is a free service, so we must provide a user_agent.
+    geolocator = Nominatim(user_agent="seafood_company_locator_app_v1")
+
+    # Use RateLimiter to avoid overwhelming the free geocoding service. 
+    # This adds a 1-second delay between each API call.
+    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+
+    # =================================================================================
+    # THIS IS YOUR INPUT DATA
+    # In a real application, this list would be populated by scraping websites
+    # like MPEDA, IndiaMART, or Zauba Corp using libraries like BeautifulSoup or Scrapy.
+    # =================================================================================
+    data_from_scraping = [
+        {"name": "Avanti Feeds Ltd.", "address": "G-2, Concorde Apartments, Somajiguda, Hyderabad, India"},
+        {"name": "Coastal Corporation Ltd.", "address": "D.No:10-1-6/1, Waltair Uplands, Visakhapatnam, Andhra Pradesh, India"},
+        {"name": "Gadre Marine Export Pvt. Ltd.", "address": "MIDC, Mirjole, Ratnagiri, Maharashtra, India"},
+        {"name": "Apex Frozen Foods Ltd.", "address": "3-160, Panasapadu, Kakinada, Andhra Pradesh, India"},
+        {"name": "A Fictional Company", "address": "123 Fake Street, Nowhere City"}, # This will fail, demonstrating error handling.
+    ]
+
+    print("Starting geocoding process...\n")
+    geocoded_results = []
+
+    for company in data_from_scraping:
+        address = company["address"]
+        print(f"Processing: {company['name']} ({address})")
+        
+        try:
+            # Call the geocoding service
+            location = geocode(address)
+            
+            if location:
+                result = {
+                    "name": company["name"],
+                    "address": address,
+                    "latitude": location.latitude,
+                    "longitude": location.longitude
+                }
+                geocoded_results.append(result)
+                print(f"  -> Success! Found at ({location.latitude:.4f}, {location.longitude:.4f})\n")
+            else:
+                print("  -> FAILED: Address not found.\n")
+
+        except Exception as e:
+            print(f"  -> ERROR: An exception occurred: {e}\n")
+        
+    return geocoded_results
+
+# --- Run the script and print the final results ---
+if __name__ == "__main__":
+    final_database = build_company_database()
+    
+    print("\n====================")
+    print("  FINAL DATABASE")
+    print("====================")
+    for entry in final_database:
+        print(f"- {entry['name']}: ({entry['latitude']}, {entry['longitude']})")
+
+        

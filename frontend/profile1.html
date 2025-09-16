@@ -1,202 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Authentication</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: hsl(0, 0%, 95%);
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 500px;
-      margin: 50px auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      padding: 20px 30px;
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    .tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .tab {
-      flex: 1;
-      padding: 12px;
-      cursor: pointer;
-      text-align: center;
-      background: #f5f5f5;
-      border-radius: 8px 8px 0 0;
-      font-weight: bold;
-    }
-    .tab.active {
-      background: #007BFF;
-      color: #fff;
-    }
-    form {
-      display: none;
-      flex-direction: column;
-      gap: 15px;
-    }
-    form.active {
-      display: flex;
-    }
-    label {
-      font-weight: bold;
-      color: #555;
-    }
-    input {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      outline: none;
-    }
-    input:focus {
-      border-color: #007BFF;
-    }
-    button {
-      padding: 12px;
-      background: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Food - User Account</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        body {
+            background-image: url('https://images.unsplash.com/photo-1547042233-64bd59f8a848?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .tab.active {
+            border-bottom: 2px solid #38bdf8; /* sky-500 */
+            color: #38bdf8;
+        }
+        /* Modal styles */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+    </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen bg-gray-900 text-white p-4">
 
-<div class="container">
-  <h2>User Authentication</h2>
+    <div class="form-container max-w-md w-full p-8 rounded-2xl shadow-2xl">
+        <h2 id="formTitle" class="text-3xl font-bold text-center mb-6">Create Account</h2>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('signup')">Sign Up</div>
-    <div class="tab" onclick="switchTab('login')">Login</div>
-  </div>
+        <div class="tabs flex border-b border-gray-600 mb-6">
+            <div id="signupTab" class="tab active flex-1 py-2 text-center cursor-pointer font-semibold" onclick="switchTab('signup')">Sign Up</div>
+            <div id="loginTab" class="tab flex-1 py-2 text-center cursor-pointer font-semibold text-gray-400" onclick="switchTab('login')">Login</div>
+        </div>
 
-  <!-- Signup Form -->
-  <form id="signupForm" class="active">
-    <label for="signupEmail">Email</label>
-    <input type="email" id="signupEmail" placeholder="Enter email" required>
+        <!-- Signup Form -->
+        <form id="signupForm" class="space-y-4">
+            <div>
+                <label for="signupEmail" class="block text-sm font-medium mb-1">Email</label>
+                <input type="email" id="signupEmail" placeholder="you@example.com" required class="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            <div>
+                <label for="signupPassword" class="block text-sm font-medium mb-1">Password</label>
+                <div class="relative">
+                    <input type="password" id="signupPassword" placeholder="Enter password" required class="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePassword('signupPassword')">
+                        <i class="fas fa-eye text-gray-400"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="flex items-center justify-between gap-4 pt-2">
+                 <button type="button" onclick="generateQuantumPassword()" class="w-1/2 py-2 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors">Generate Password</button>
+                 <button type="submit" class="w-1/2 py-2 bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors font-bold">Sign Up</button>
+            </div>
+        </form>
 
-    <label for="signupPassword">Password</label>
-    <input type="password" id="signupPassword" placeholder="Enter password" required>
+        <!-- Login Form -->
+        <form id="loginForm" class="hidden space-y-4">
+            <div>
+                <label for="loginEmail" class="block text-sm font-medium mb-1">Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required class="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            <div>
+                <label for="loginPassword" class="block text-sm font-medium mb-1">Password</label>
+                 <div class="relative">
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required class="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePassword('loginPassword')">
+                        <i class="fas fa-eye text-gray-400"></i>
+                    </span>
+                </div>
+                <div class="text-right mt-2">
+                    <a href="#" onclick="showForgotPassword(event)" class="text-xs text-sky-400 hover:underline">forgot password?</a>
+                </div>
+            </div>
+            <button type="submit" class="w-full py-2 bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors font-bold mt-4">Login</button>
+        </form>
 
-    <div class="toggle-container">
-      <input type="checkbox" onclick="togglePassword('signupPassword')">
-      <label>Show Password</label>
+        <!-- Forgot Password Form -->
+        <form id="forgotPasswordForm" class="hidden space-y-4">
+            <div>
+                <label for="resetEmail" class="block text-sm font-medium mb-1">Email / Mobile Number</label>
+                <input type="text" id="resetEmail" placeholder="Enter your email or mobile" required class="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            <button type="button" onclick="generateQuantumOTP()" class="w-full py-2 bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors font-bold">Send Code / OTP</button>
+            <div class="text-center">
+                 <a href="#" onclick="hideForgotPassword(event)" class="text-xs text-sky-400 hover:underline">Back to Login</a>
+            </div>
+        </form>
     </div>
 
-    <button type="button" onclick="gen_pass()">Generate Password</button>
-    <button type="submit">Sign Up</button>
-  </form>
-
-  <!-- Login Form -->
-  <form id="loginForm">
-    <label for="loginEmail">Email</label>
-    <input type="email" id="loginEmail" placeholder="Enter email" required>
-
-    <label for="loginPassword">Password</label>
-    <input type="password" id="loginPassword" placeholder="Enter password" required>
-
-    <div class="toggle-container">
-      <input type="checkbox" onclick="togglePassword('loginPassword')">
-      <label>Show Password</label>
+    <!-- Quantum OTP Modal -->
+    <div id="otpModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden opacity-0">
+        <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-95">
+            <h3 class="text-2xl font-bold text-sky-400 mb-2">Quantum OTP Generated</h3>
+            <p class="text-gray-300 mb-4">Your truly random, secure One-Time Password is:</p>
+            <div id="otpDisplay" class="text-4xl font-mono tracking-widest bg-gray-900 rounded-lg py-3 mb-6">
+                <!-- OTP will be injected here -->
+            </div>
+            <button onclick="closeModal()" class="w-full py-2 bg-sky-600 rounded-lg hover:bg-sky-700 transition-colors font-bold">Close</button>
+        </div>
     </div>
 
-    <button type="submit">Login</button>
-  </form>
-</div>
 
 <script>
-  // Tab Switcher
-  function switchTab(tab) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('form').forEach(f => f.classList.remove('active'));
+    const API_URL = "http://127.0.0.1:8000"; // Your backend server URL
 
-    if(tab === 'signup') {
-      document.querySelector('.tab:first-child').classList.add('active');
-      document.getElementById('signupForm').classList.add('active');
-    } else {
-      document.querySelector('.tab:last-child').classList.add('active');
-      document.getElementById('loginForm').classList.add('active');
+    function switchTab(tab) {
+        const signupTab = document.getElementById('signupTab');
+        const loginTab = document.getElementById('loginTab');
+        const signupForm = document.getElementById('signupForm');
+        const loginForm = document.getElementById('loginForm');
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        const formTitle = document.getElementById('formTitle');
+
+        signupTab.classList.remove('active');
+        loginTab.classList.remove('active');
+        signupForm.classList.add('hidden');
+        loginForm.classList.add('hidden');
+        forgotPasswordForm.classList.add('hidden');
+
+        if (tab === 'signup') {
+            signupTab.classList.add('active');
+            signupForm.classList.remove('hidden');
+            formTitle.textContent = 'Create Account';
+        } else {
+            loginTab.classList.add('active');
+            loginForm.classList.remove('hidden');
+            formTitle.textContent = 'Welcome Back';
+        }
     }
-  }
 
-  // Prevent real form submission
-  document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      
-      if(form.id === "signupForm") {
-        // Get signup values
-        const email = document.getElementById("signupEmail").value;
-        const password = document.getElementById("signupPassword").value;
+    function togglePassword(fieldId) {
+        const input = document.getElementById(fieldId);
+        const icon = input.nextElementSibling.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
 
-        alert("Signup successful! Please login now.");
+    // --- Quantum-Powered Functions ---
+    async function generateQuantumPassword() {
+        try {
+            const response = await fetch(`${API_URL}/api/generate-quantum-password?length=14`);
+            if (!response.ok) throw new Error('Failed to generate password.');
+            const data = await response.json();
+            document.getElementById('signupPassword').value = data.password;
+            alert('A quantum-secure password has been generated for you!');
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
 
-        // Autofill login form
-        document.getElementById("loginEmail").value = email;
-        document.getElementById("loginPassword").value = password;
+    async function generateQuantumOTP() {
+        const resetInput = document.getElementById('resetEmail').value;
+        if (!resetInput) {
+            alert('Please enter an email or mobile number first.');
+            return;
+        }
 
-        // Switch to login tab
-        switchTab("login");
-      } else {
-        alert("Login successful!");
-      }
+        try {
+            const response = await fetch(`${API_URL}/api/generate-quantum-otp`);
+            if (!response.ok) throw new Error('Failed to generate OTP.');
+            const data = await response.json();
+            
+            // Show the modal with the OTP
+            document.getElementById('otpDisplay').textContent = data.otp;
+            openModal();
+
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+    // --- Forgot Password Flow ---
+    function showForgotPassword(event) {
+        event.preventDefault();
+        document.getElementById('signupForm').classList.add('hidden');
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('forgotPasswordForm').classList.remove('hidden');
+        document.getElementById('formTitle').textContent = 'Reset Password';
+        // Deselect tabs
+        document.getElementById('signupTab').classList.remove('active');
+        document.getElementById('loginTab').classList.remove('active');
+    }
+
+    function hideForgotPassword(event) {
+        event.preventDefault();
+        switchTab('login'); // Go back to the login tab
+    }
+    
+    // --- Modal Controls ---
+    function openModal() {
+        const modal = document.getElementById('otpModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => { // Delay to allow display:block to take effect before transition
+             modal.classList.remove('opacity-0');
+             modal.querySelector('.modal-content').classList.remove('scale-95');
+        }, 10);
+    }
+
+    function closeModal() {
+         const modal = document.getElementById('otpModal');
+         modal.classList.add('opacity-0');
+         modal.querySelector('.modal-content').classList.add('scale-95');
+         setTimeout(() => {
+             modal.classList.add('hidden');
+         }, 300); // Wait for transition to finish
+    }
+
+    // --- Form Submission Logic ---
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (form.id === "signupForm") {
+                const email = document.getElementById("signupEmail").value;
+                const password = document.getElementById("signupPassword").value;
+                alert("Signup successful! Please login now.");
+                document.getElementById("loginEmail").value = email;
+                document.getElementById("loginPassword").value = ""; // Clear password for security
+                switchTab("login");
+            } else if (form.id === "loginForm") {
+                alert("Login successful!");
+                // Here you would redirect to another page, e.g., window.location.href = '/dashboard.html';
+            }
+        });
     });
-  });
 
-  function gen_pass(){
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const digits = '0123456789';
-    const specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
-    const allChars = uppercase + lowercase + digits + specialChars;
-
-    const passwordChars = [
-      uppercase[Math.floor(Math.random() * uppercase.length)],
-      lowercase[Math.floor(Math.random() * lowercase.length)],
-      digits[Math.floor(Math.random() * digits.length)],
-      specialChars[Math.floor(Math.random() * specialChars.length)]
-    ];
-
-    for (let i = 4; i < 8; i++) {
-      passwordChars.push(allChars[Math.floor(Math.random() * allChars.length)]);
-    }
-
-    // shuffle
-    for (let i = passwordChars.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
-    }
-
-    document.getElementById('signupPassword').value = passwordChars.join('');
-  }
-
-  function togglePassword(fieldId) {
-    const input = document.getElementById(fieldId);
-    input.type = input.type === 'password' ? 'text' : 'password';
-  }
 </script>
 
 </body>
 </html>
+

@@ -1,0 +1,103 @@
+import numpy as np
+from qiskit import QuantumCircuit
+from qiskit.primitives import Sampler
+from qiskit_ibm_runtime import QiskitRuntimeService, Session, Options
+
+def solve_with_quantum(input_data):
+    """
+    Builds, executes, and processes a quantum circuit.
+    
+    Args:
+        input_data (dict): A dictionary containing any input parameters from your backend.
+                           For this example, we'll use a single value.
+    
+    Returns:
+        dict: A dictionary containing the results from the quantum computation.
+    """
+    
+    # -------------------------------------------------------------------------
+    # PART 1: BUILD THE QUANTUM CIRCUIT
+    # -------------------------------------------------------------------------
+    
+    # We'll create a simple circuit that takes a classical input and encodes
+    # it into a quantum state. This is a very basic example of "mapping" a
+    # classical problem to a quantum one.
+    
+    # Get the input value from the dictionary
+    value = input_data.get('value', 0)
+    
+    # Create a circuit with a single qubit and a single classical bit
+    qc = QuantumCircuit(1, 1)
+    
+    # Apply a rotation gate (Ry) based on the input value.
+    # This is how you embed classical data into a quantum state.
+    # The value is scaled by pi to ensure it's a valid angle for the gate.
+    qc.ry(value * np.pi, 0)
+    
+    # Measure the qubit to get a classical outcome (0 or 1)
+    qc.measure(0, 0)
+    
+    print("Quantum Circuit created:")
+    print(qc.draw())
+    
+    # -------------------------------------------------------------------------
+    # PART 2: CONNECT TO IBM QUANTUM PLATFORM AND RUN THE JOB
+    # -------------------------------------------------------------------------
+
+    try:
+        # The QiskitRuntimeService will automatically load your saved credentials.
+        service = QiskitRuntimeService(channel='ibm_quantum')
+        
+        # Choose a backend to run the circuit on.
+        # For this example, we'll use a simulator for fast, noise-free results.
+        # You can replace this with a real device name from your dashboard,
+        # e.g., service.get_backend("ibm_lagos")
+        backend = service.get_backend("ibmq_qasm_simulator")
+        
+        # Primitives are the recommended way to run on IBM Quantum.
+        # Sampler gives you a probability distribution of measurement outcomes.
+        options = Options(shots=1000)
+        
+        # Use a Session to group related jobs for efficiency.
+        with Session(service=service, backend=backend) as session:
+            sampler = Sampler(session=session)
+            
+            # Submit the circuit to the backend
+            job = sampler.run(circuits=[qc], shots=options.shots)
+            
+            # Get the result
+            result = job.result()
+            
+            # The result is a PrimitiveResult object.
+            # We'll extract the counts from the first (and only) circuit.
+            counts = result[0].data.get('meas', {})
+            
+            print(f"Job completed successfully. Counts: {counts}")
+
+    except Exception as e:
+        print(f"An error occurred during quantum execution: {e}")
+        counts = {"error": str(e)}
+
+    # -------------------------------------------------------------------------
+    # PART 3: RETURN THE RESULTS
+    # -------------------------------------------------------------------------
+    
+    # We return the counts as a dictionary. Your backend can then use this
+    # data to respond to the frontend.
+    return counts
+
+# This code block is for testing the function locally.
+if __name__ == "__main__":
+    # Example of how your backend would call this function.
+    test_input = {"value": 0.5}
+    quantum_results = solve_with_quantum(test_input)
+    print("\nFinal Result from Quantum Solver:")
+    print(quantum_results)
+    
+    # For a different input
+    test_input = {"value": 0.25}
+    quantum_results = solve_with_quantum(test_input)
+    print("\nFinal Result from Quantum Solver with new input:")
+    print(quantum_results)
+
+    
