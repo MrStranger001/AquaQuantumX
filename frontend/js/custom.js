@@ -1,7 +1,7 @@
 
 
 // API URL for your Python backend
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://aqua-quantum-backend.onrender.com";
 
 // --- Map Initialization ---
 const map = L.map('map').setView([20.5937, 78.9629], 5);
