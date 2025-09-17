@@ -1,44 +1,123 @@
+# from qiskit import QuantumCircuit
+# from qiskit_ibm_runtime import QiskitRuntimeService, Sampler, Session
+
+# # Load your account from the saved credentials
+# service = QiskitRuntimeService(channel='ibm_quantum')
+
+# # Create a quantum circuit with 2 qubits and 2 classical bits
+# qc = QuantumCircuit(2, 2)
+
+# # Apply a Hadamard gate to qubit 0, putting it in superposition
+# qc.h(0)
+
+# # Apply a CNOT gate with qubit 0 as control and qubit 1 as target, entangling them
+# qc.cx(0, 1)
+
+# # Measure the qubits and map the results to the classical bits
+# qc.measure([0, 1], [0, 1])
+
+# # Visualize the circuit (optional, but helpful)
+# print("Circuit diagram:")
+# print(qc.draw())
+
+# # Select a backend (a real quantum computer or a simulator)
+# # Use a simulator for now to see fast, noise-free results
+# backend = service.get_backend("ibmq_qasm_simulator")
+
+# # Use a session to group your jobs for more efficient execution
+# with Session(service=service, backend=backend) as session:
+#     # Use the Sampler primitive to run the circuit
+#     sampler = Sampler(session=session)
+
+#     # Submit the job with your circuit
+#     job = sampler.run(qc)
+
+#     # Get the results from the job
+#     result = job.result()
+    
+#     # Print the probability distribution of the outcomes
+#     print("Execution results:")
+#     print(result)
+    
+
+
+
+
+
+
+
+import os  # <-- ADD THIS IMPORT
+import numpy as np
 from qiskit import QuantumCircuit
-from qiskit_ibm_runtime import QiskitRuntimeService, Sampler, Session
+from qiskit.primitives import Sampler
+from qiskit_ibm_runtime import QiskitRuntimeService, Session, Options
 
-# Load your account from the saved credentials
-service = QiskitRuntimeService(channel='ibm_quantum')
-
-# Create a quantum circuit with 2 qubits and 2 classical bits
-qc = QuantumCircuit(2, 2)
-
-# Apply a Hadamard gate to qubit 0, putting it in superposition
-qc.h(0)
-
-# Apply a CNOT gate with qubit 0 as control and qubit 1 as target, entangling them
-qc.cx(0, 1)
-
-# Measure the qubits and map the results to the classical bits
-qc.measure([0, 1], [0, 1])
-
-# Visualize the circuit (optional, but helpful)
-print("Circuit diagram:")
-print(qc.draw())
-
-# Select a backend (a real quantum computer or a simulator)
-# Use a simulator for now to see fast, noise-free results
-backend = service.get_backend("ibmq_qasm_simulator")
-
-# Use a session to group your jobs for more efficient execution
-with Session(service=service, backend=backend) as session:
-    # Use the Sampler primitive to run the circuit
-    sampler = Sampler(session=session)
-
-    # Submit the job with your circuit
-    job = sampler.run(qc)
-
-    # Get the results from the job
-    result = job.result()
+def solve_with_quantum(input_data):
+    """
+    Builds, executes, and processes a quantum circuit on a real quantum computer.
     
-    # Print the probability distribution of the outcomes
-    print("Execution results:")
-    print(result)
+    Args:
+        input_data (dict): A dictionary containing any input parameters from your backend.
     
+    Returns:
+        dict: A dictionary containing the results from the quantum computation.
+    """
+    
+    # PART 1: BUILD THE QUANTUM CIRCUIT (This part remains the same)
+    # -------------------------------------------------------------------------
+    
+    value = input_data.get('value', 0)
+    qc = QuantumCircuit(1, 1)
+    qc.ry(value * np.pi, 0)
+    qc.measure(0, 0)
+    
+    print("Quantum Circuit created:")
+    print(qc.draw())
+    
+    # -------------------------------------------------------------------------
+    # PART 2: CONNECT TO REAL IBM HARDWARE AND RUN THE JOB
+    # -------------------------------------------------------------------------
 
+    try:
+        # Load your account from the API key stored in Render's environment variables.
+        service = QiskitRuntimeService(
+            channel='ibm_quantum', 
+            token=os.getenv("IBM_QUANTUM_TOKEN")  # <-- CHANGED: Load token securely
+        )
+        
+        # Choose the least-busy, operational REAL quantum computer.
+        backend = service.least_busy(
+            simulator=False, 
+            operational=True  # <-- CHANGED: Select a real device
+        )
+        print(f"Backend selected: {backend.name}")
+        
+        options = Options(shots=1000)
+        
+        with Session(service=service, backend=backend) as session:
+            sampler = Sampler(session=session)
+            job = sampler.run(circuits=[qc], shots=options.shots)
+            print(f"Job submitted to {backend.name} with ID: {job.job_id()}")
+            result = job.result()
+            
+            counts = result[0].data.get('meas', {})
+            print(f"Job completed successfully. Counts: {counts}")
+
+    except Exception as e:
+        print(f"An error occurred during quantum execution: {e}")
+        counts = {"error": str(e)}
+
+    # -------------------------------------------------------------------------
+    # PART 3: RETURN THE RESULTS (This part remains the same)
+    # -------------------------------------------------------------------------
+    
+    return counts
+
+# ... your local testing block remains the same ...
+if __name__ == "__main__":
+    test_input = {"value": 0.5}
+    quantum_results = solve_with_quantum(test_input)
+    print("\nFinal Result from Quantum Solver:")
+    print(quantum_results)
 
     

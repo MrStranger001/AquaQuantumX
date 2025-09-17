@@ -24,7 +24,44 @@ const clearMap = () => {
     markers = [];
     routeLines = [];
 };
+// Get a reference to the new button and the main input field
+const getLocationButton = document.getElementById('getLocationBtn');
+const locationInput = document.getElementById('locationInput'); // <-- CHANGED
 
+// Add a click event listener to the button
+getLocationButton.addEventListener('click', () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+});
+
+// This function is called if the location is successfully retrieved
+function successFunction(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    // Put the coordinates directly into the main input field
+    locationInput.value = `${lat} ${lon}`; 
+}
+
+// This function is called if an error occurs
+function errorFunction(error) {
+    let errorMessage = "An unknown error occurred.";
+    switch (error.code) {
+        case error.PERMISSION_DENIED:
+            errorMessage = "User denied the request for Geolocation.";
+            break;
+        case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+        case error.TIMEOUT:
+            errorMessage = "The request to get user location timed out.";
+            break;
+    }
+    alert(errorMessage);
+}
 // --- Main Function to Find Routes ---
 const findRoutes = async () => {
     const locationInput = document.getElementById('locationInput').value.trim();
